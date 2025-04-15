@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: task-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: task-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - mongo
+    # No volumes = no overriding node_modules
+    # If you want hot reload, you can use nodemon and volume-mount just /src
+
+  frontend:
+   build: ./frontend
+   container_name: task-frontend
+   restart: always
+   ports:
+    - "3000:80"  # Maps container port 80 (default for Nginx) to host 3000
+   depends_on:
+    - backend
+
+
+volumes:
+  mongo-data:
